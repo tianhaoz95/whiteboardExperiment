@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Whiteboard from './Whiteboard';
 import SimpleWebrtc from 'simplewebrtc/src/simplewebrtc';
+import * as firebase from 'firebase';
 import './App.css';
 
 class App extends Component {
@@ -18,6 +19,7 @@ class App extends Component {
       autoRequestMedia: false,
       url: "https://acumany-signal-master.herokuapp.com/",
     });
+    this.fb = firebase.database().ref("/TestRoom");
   }
 
   componentDidMount() {
@@ -25,6 +27,7 @@ class App extends Component {
       console.log("sessionId => ", sessionId);
       this.setState({ connected: true });
       this.rtc.joinRoom("test_room", () => {
+        this.rtc.sendDirectlyToAll("whiteboard", "initChannel", null);
         this.setState({ roomJoined: true });
       });
     })
@@ -44,15 +47,20 @@ class App extends Component {
   }
 
   renderWhiteBoard() {
+
     return (
-      <Whiteboard rtc={this.rtc}/>
+      <Whiteboard
+        rtc={this.rtc}
+        fb={this.fb}
+        peerCreated={this.state.peerCreated}
+        type="webrtc"/>
     );
   }
 
   render() {
     let content = null;
 
-    if (this.state.roomJoined && this.state.peerCreated && this.state.connected) {
+    if (this.state.roomJoined && this.state.connected) {
       content = this.renderWhiteBoard();
     }
 
