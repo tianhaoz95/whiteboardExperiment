@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import * as d3 from "d3";
 import './index.css';
 import _ from 'lodash';
-import { uploadAction, svg_to_pdf, download_pdf } from './helper';
+import { uploadAction, svg_to_pdf, download_pdf, sendInitReq } from './helper';
 import moment from 'moment';
 import { SketchPicker } from 'react-color';
 import { Slider, Popover, Button } from 'antd';
@@ -42,29 +42,11 @@ class Whiteboard extends Component {
         .subject(function() { var p = [d3.event.x, d3.event.y]; return [p, p]; })
         .on("start", this.dragstarted));
 
-
-    setTimeout(function () {
-      if (thisObj.props.type === "webrtc" && thisObj.peerCreated) {
-        console.log("requesting history");
-        thisObj.props.rtc.sendDirectlyToAll("whiteboard", "initReq", null);
-      }
-    }, 2000);
-
-    this.props.rtc.on('channelMessage', (room, label, message) => {
-      console.log("message received");
-      console.log("label => ", label);
-      console.log("message => ", message);
-      if (label === "whiteboard" && message.type === "initReq" && this.history.length !== 0) {
-        this.props.rtc.sendDirectlyToAll(
-          "whiteboard",
-          "initRes",
-          {
-            history: this.history,
-          }
-        );
-      }
-      if (label === "whiteboard" && message.type === "initRes" && this.init) {
-        var history = message.payload.history;
+    if (thisObj.props.type === "webrtc" && thisObj.peerCreated) {
+      sendInitReq(this.props.rtc)
+      .then((snap) => {
+        console.log(snap);
+        var history = snap.data.payload.history;
         _.forEach(history, (action) => {
           var data = action.data;
           var thickness = action.thickness;
@@ -78,6 +60,24 @@ class Whiteboard extends Component {
         });
         this.history = history;
         this.init = false;
+      })
+      .catch((err) => {
+        console.log("fuck", err);
+      });
+    }
+
+    this.props.rtc.on('channelMessage', (room, label, message) => {
+      console.log("message received");
+      console.log("label => ", label);
+      console.log("message => ", message);
+      if (label === "whiteboard" && message.type === "initReq" && this.history.length !== 0) {
+        this.props.rtc.sendDirectlyToAll(
+          "whiteboard",
+          "initRes",
+          {
+            history: this.history,
+          }
+        );
       }
       if (label === "whiteboard" && message.type === "action") {
         var action = message.payload.action;

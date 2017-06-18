@@ -34,6 +34,8 @@ class App extends Component {
 
     this.rtc.on('createdPeer', (peer) => {
       console.log(peer);
+      var channelInfo = peer.getDataChannel("whiteboard");
+      console.log(channelInfo);
       this.setState({ peerCreated: true });
     });
   }
@@ -53,7 +55,7 @@ class App extends Component {
         rtc={this.rtc}
         fb={this.fb}
         peerCreated={this.state.peerCreated}
-        type="firebase"/>
+        type="webrtc"/>
     );
   }
 

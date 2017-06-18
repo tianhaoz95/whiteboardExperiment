@@ -89,3 +89,31 @@ export function download_pdf(name, dataUriString) {
   document.body.appendChild(link);
   link.click();
 }
+
+export function sendInitReq(rtc) {
+  return new Promise((resolve, reject) => {
+    var count = 0;
+    var req = setInterval(() => {
+      console.log("sending initial request");
+      rtc.sendDirectlyToAll("whiteboard", "initReq", null);
+      count = count + 1;
+      if (count === 15) {
+        clearInterval(req);
+        reject({
+          type: "fail",
+          description: "no response for initialize"
+        });
+      }
+    }, 200);
+    rtc.on('channelMessage', (room, label, message) => {
+      if (label === "whiteboard" && message.type === "initRes") {
+         clearInterval(req);
+         resolve({
+           type: "success",
+           description: "got initialize response",
+           data: message,
+         });
+      }
+    });
+  });
+}
