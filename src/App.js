@@ -53,7 +53,7 @@ class App extends Component {
         rtc={this.rtc}
         fb={this.fb}
         peerCreated={this.state.peerCreated}
-        type="webrtc"/>
+        type="firebase"/>
     );
   }
 

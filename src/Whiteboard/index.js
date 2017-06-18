@@ -14,7 +14,7 @@ class Whiteboard extends Component {
     super(props);
     this.state = {
       thickness: 3,
-      color: "red",
+      color: "black",
       visible: false,
     };
     this.svgRef = null;

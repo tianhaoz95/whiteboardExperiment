@@ -5,7 +5,8 @@
 }
 
 .whiteboard-background {
-  fill: black;
+  fill: white;
+  stroke: black;
   width: 100%;
   height: 100%;
   stroke: black;
@@ -15,7 +16,7 @@
 .whiteboard-button {
   position: absolute;
   top: 10px;
-  left: 30px;
+  left: 20px;
 }
 
 .whiteboard-popover-container {
