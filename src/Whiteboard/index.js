@@ -16,11 +16,11 @@ class Whiteboard extends Component {
       thickness: 3,
       color: "black",
       visible: false,
+      enable: false,
     };
     this.svgRef = null;
     this.svg = null;
     this.timestamp = 0;
-    this.init = true;
     this.peerCreated = props.peerCreated;
     this.history = [];
     this.dragstarted = this.dragstarted.bind(this);
@@ -42,7 +42,7 @@ class Whiteboard extends Component {
         .subject(function() { var p = [d3.event.x, d3.event.y]; return [p, p]; })
         .on("start", this.dragstarted));
 
-    if (thisObj.props.type === "webrtc" && thisObj.peerCreated) {
+    if (thisObj.props.type === "webrtc") {
       sendInitReq(this.props.rtc)
       .then((snap) => {
         console.log(snap);
@@ -59,10 +59,11 @@ class Whiteboard extends Component {
           remote.attr("d", line);
         });
         this.history = history;
-        this.init = false;
+        this.setState({ enable: true });
       })
       .catch((err) => {
         console.log("fuck", err);
+        this.setState({ enable: true });
       });
     }
 
@@ -114,6 +115,7 @@ class Whiteboard extends Component {
 
   dragstarted() {
     console.log("drag started");
+    if (!this.state.enable) return;
     var d = d3.event.subject,
         active = this.svg.append("path")
         .attr("class", "my-path")
